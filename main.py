@@ -9,7 +9,7 @@ import time
 import shutil
 import openpyxl                       # Для .xlsx
 #import xlrd                          # для .xls
-from   price_tools import getCellXlsx, getCell, nameToId, currencyTypeX, sheetByName
+from   price_tools import getCellXlsx, getCell, nameToId, currencyTypeX, currencyType, sheetByName
 import csv
 import urllib.request
 
@@ -98,15 +98,15 @@ def convert_excel2csv(cfg):
         csvWriterEUR.writeheader()
 
 
-    '''                                     # Блок проверки свойств для распознавания групп      XLSX
-    for i in range(2, 15):
+                                         # Блок проверки свойств для распознавания групп      XLSX
+    for i in range(1, 8):
         i_last = i
         ccc = sheet.cell( row=i, column=in_cols_j['подгруппа'] )
-        print(i, sheet.cell(row=i, column=in_cols_j['цена1']).value, ccc.value)
-        print(ccc.font.name, ccc.font.sz, ccc.font.b, ccc.font.i, '------', 'ccc.font.color.rgb', ccc.fill.bgColor.rgb, 'ccc.fill.fgColor.rgb')
+        print(i, sheet.cell(row=i, column=in_cols_j['подгруппа']).value, ccc.value)
+        print(ccc.font.name, ccc.font.sz, ccc.font.b, ccc.font.i, '------', ccc.font.color.value, ccc.fill.bgColor.value, ccc.fill.fgColor.value)
         print('------')
-    return
-    '''
+#    return
+
     '''                                     # Блок проверки свойств для распознавания групп      XLS                                  
     for i in range(19, 25):                                                         
         xfx = sheet.cell_xf_index(i, 1)
@@ -134,6 +134,7 @@ def convert_excel2csv(cfg):
     recOut  ={}
     subgrp = ''
     grp = ''
+    series = ''
     for i in range(1, sheet.max_row +1) :                               # xlsx
 #   for i in range(1, sheet.nrows) :                                     # xls
         i_last = i
@@ -144,22 +145,25 @@ def convert_excel2csv(cfg):
             impValues = getXlsxString(sheet, i, in_cols_j)                # xlsx
             #impValues = getXlsString(sheet, i, in_cols_j)                # xls
             #print( impValues )
-            ccc1 = sheet.cell(row=i, column=in_cols_j['цена1']).value
+            ccc1 = sheet.cell(row=i, column=in_cols_j['код_']).value
 
-            if sheetName in ('BOSCH VS', 'BOSCH CONGRESS', 'BOSCH PA'):
-                if (sheet.cell(row=i, column=in_cols_j['подгруппа']).font.b is True and
-                    sheet.cell(row=i, column=in_cols_j['цена1']).value is None):          # подгруппа
-                    subgrp = impValues['подгруппа']
-                    continue
-                elif (impValues['код_'] == '' or
-                    impValues['код_'] == 'SAP' or
-                    impValues['цена1'] == '0'):                                           # лишняя строка
-                    continue
-                impValues['подгруппа'] = subgrp
-                impValues['описание'] = impValues['описание'].encode('cp1251', errors='replace').decode('cp1251')
+            if (sheet.cell(row=i, column=in_cols_j['группа_']).fill.fgColor.value == 'FFFFFF00'):      # группа
+                grp = impValues['группа_']
+                continue
+            elif (sheet.cell(row=i, column=in_cols_j['подгруппа']).fill.fgColor.value == 'FF00B050'):  # подгруппа
+                subgrp = impValues['подгруппа']
+                continue
+            elif ((sheet.cell(row=i, column=in_cols_j['серия']).fill.fgColor.value == 'FF92D050') and
+                (sheet.cell(row=i, column=in_cols_j['цена1']).value == None)):                          # серия
+                series = impValues['серия']
+                continue
+            elif (impValues['цена1'] == '0'):                                                   # лишняя строка
+                continue
+            impValues['подгруппа'] = subgrp
+            impValues['группа_'] = grp
+            impValues['серия'] = series
+            impValues['тип_экрана'] = impValues['тип_экрана'].encode('cp1251', errors='replace').decode('cp1251')
 
-            else:
-                log.error('нераспознан sheetName "%s"', sheetName)      # далее общая для всех обработка
 
             for outColName in out_template.keys() :
                 shablon = out_template[outColName]
@@ -174,9 +178,11 @@ def convert_excel2csv(cfg):
                 recOut[outColName] = shablon.strip()
 
             recOut['код'] = nameToId(recOut['код'])
+            '''
             if  recOut['продажа'] == '0.1':
                 recOut['валюта'] = 'USD'
                 recOut['закупка'] = '0.1'
+            '''
             if recOut['валюта'] == 'RUR':
                 csvWriterRUR.writerow(recOut)
             elif recOut['валюта'] == 'USD':
