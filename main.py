@@ -177,7 +177,7 @@ def convert_excel2csv(cfg):
                     shablon = str(round(vvv1 * vvv2, 2))
                 recOut[outColName] = shablon.strip()
 
-            recOut['код'] = nameToId(recOut['код'])
+            recOut['код'] = nameToId(recOut['код'] + series + subgrp)
             '''
             if  recOut['продажа'] == '0.1':
                 recOut['валюта'] = 'USD'
