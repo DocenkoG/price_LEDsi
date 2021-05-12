@@ -98,15 +98,15 @@ def convert_excel2csv(cfg):
         csvWriterEUR.writeheader()
 
 
-                                         # Блок проверки свойств для распознавания групп      XLSX
+    '''                                     # Блок проверки свойств для распознавания групп      XLSX
     for i in range(1, 8):
         i_last = i
         ccc = sheet.cell( row=i, column=in_cols_j['подгруппа'] )
         print(i, sheet.cell(row=i, column=in_cols_j['подгруппа']).value, ccc.value)
         print(ccc.font.name, ccc.font.sz, ccc.font.b, ccc.font.i, '------', ccc.font.color.value, ccc.fill.bgColor.value, ccc.fill.fgColor.value)
         print('------')
-#    return
-
+    return
+    '''
     '''                                     # Блок проверки свойств для распознавания групп      XLS                                  
     for i in range(19, 25):                                                         
         xfx = sheet.cell_xf_index(i, 1)
