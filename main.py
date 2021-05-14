@@ -178,6 +178,8 @@ def convert_excel2csv(cfg):
                 recOut[outColName] = shablon.strip()
 
             recOut['код'] = nameToId(recOut['код'])
+            if subgrp.find('Шар') < 0:
+                recOut['описание'] = recOut['описание'] + ' (цена за 1 кв. м.)'
             '''
             if  recOut['продажа'] == '0.1':
                 recOut['валюта'] = 'USD'
